@@ -12,7 +12,7 @@ permissions:
 jobs:
   macos:
     name: macOS 패키지
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: 태그와 VERSION 일치 확인

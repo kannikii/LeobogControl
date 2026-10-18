@@ -10,7 +10,7 @@ on:
 jobs:
   macos:
     name: macOS 앱 · CLI 빌드
-    runs-on: macos-14
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: swiftc 로 빌드 (설치 없이)

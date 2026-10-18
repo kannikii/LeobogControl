@@ -25,7 +25,18 @@ public struct PhysicalKey: Identifiable, Hashable, Sendable {
 
     /// 이 물리 키가 보낸 것으로 볼 수 있는 usage 인가
     public func matches(_ u: HIDUsage) -> Bool { usage == u || altUsages.contains(u) }
-    // 주의: ==/hash 는 합성(모든 필드 비교). id 만 비교하면 Mac/Windows 목록이 같다고 판정되어 모드 전환 시 다시 그리지 않을 수 있다.
+
+    // 주의: ==/hash 는 모든 필드를 비교한다. id 만 비교하면 Mac/Windows 목록이 같다고 판정되어 모드 전환 시 다시 그리지 않을 수 있다.
+    // CGRect 는 macOS 14 SDK(Xcode 15) 에서 Hashable 이 아니라 합성이 안 되므로 직접 구현한다.
+    public static func == (a: PhysicalKey, b: PhysicalKey) -> Bool {
+        a.id == b.id && a.label == b.label && a.macLabel == b.macLabel && a.usage == b.usage && a.altUsages == b.altUsages
+            && a.frame.equalTo(b.frame) && a.ledIndex == b.ledIndex && a.kind == b.kind
+    }
+    public func hash(into h: inout Hasher) {
+        h.combine(id); h.combine(label); h.combine(macLabel); h.combine(usage); h.combine(altUsages)
+        h.combine(frame.origin.x); h.combine(frame.origin.y); h.combine(frame.size.width); h.combine(frame.size.height)
+        h.combine(ledIndex); h.combine(kind)
+    }
 }
 
 public enum Hi8SELayout {
