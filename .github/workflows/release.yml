@@ -1,0 +1,81 @@
+name: Release
+
+# vX.Y.Z 태그를 푸시하면 두 플랫폼을 빌드해 GitHub Release 에 첨부한다.
+#   scripts/release.sh bump X.Y.Z → 커밋 → scripts/release.sh tag
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  macos:
+    name: macOS 패키지
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: 태그와 VERSION 일치 확인
+        run: |
+          v="$(tr -d '[:space:]' < VERSION)"
+          [[ "${GITHUB_REF_NAME}" == "v$v" ]] || { echo "태그 ${GITHUB_REF_NAME} 와 VERSION $v 가 다릅니다"; exit 1; }
+      - name: 빌드 · zip
+        run: |
+          export SDKROOT="$(xcrun --show-sdk-path)"
+          zsh scripts/build-app.sh --no-install
+          v="$(tr -d '[:space:]' < VERSION)"
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent "build/Leobog Control.app" "dist/LeobogControl-macOS-$v.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/*.zip
+
+  windows:
+    name: Windows 패키지
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '7.0.x'
+      - name: publish (self-contained 단일 exe)
+        shell: pwsh
+        run: |
+          $v = (Get-Content VERSION -Raw).Trim()
+          dotnet publish windows/LeobogControl.Windows/LeobogControl.Windows.csproj -c Release -r win-x64 --self-contained true `
+            -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:DebugType=none -p:Version=$v -o build/windows
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path build/windows/LeobogControl.exe -DestinationPath "dist/LeobogControl-Windows-$v.zip" -Force
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: dist/*.zip
+
+  release:
+    name: GitHub Release 생성
+    needs: [macos, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: 체크섬 · 릴리스 노트
+        run: |
+          cd dist && sha256sum *.zip > SHA256SUMS.txt && cd ..
+          v="${GITHUB_REF_NAME#v}"
+          # CHANGELOG 에서 이 버전 절만 추출
+          awk -v ver="$v" '
+            $0 ~ "^## \\[" ver "\\]" {on=1; next}
+            on && /^## \[/ {exit}
+            on {print}
+          ' CHANGELOG.md > notes.md
+          [[ -s notes.md ]] || echo "Leobog Control $v" > notes.md
+          cat notes.md
+      - name: Release 생성 · 첨부
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* --title "Leobog Control ${GITHUB_REF_NAME#v}" --notes-file notes.md

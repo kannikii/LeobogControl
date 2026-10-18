@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Leobog Control — Windows 버전 (2.4G 동글 / USB 연결용)
+    빌드:   dotnet build -c Release
+    배포:   dotnet publish -c Release -r win-x64 -p:PublishSingleFile=true -p:SelfContained=true
+    macOS/Linux 에서는 -p:EnableWindowsTargeting=true 로 컴파일 검증만 가능하다 (실행은 Windows 10 이상).
+  -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>LeobogControl</AssemblyName>
+    <RootNamespace>LeobogControl</RootNamespace>
+    <ApplicationIcon>Resources/app.ico</ApplicationIcon>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <Version>1.0.0</Version>
+    <Product>Leobog Control</Product>
+    <Description>LEOBOG Hi8SE 키보드 제어 도구 (비공식)</Description>
+    <Copyright>Leobog Hi8SE 제어 도구 (비공식)</Copyright>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <!-- 단일 파일 배포 시 네이티브 라이브러리를 임시 폴더에 풀지 않도록 -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="HidSharp" Version="2.1.0" />
+  </ItemGroup>
+</Project>
