@@ -1,0 +1,24 @@
+# 빌드 산출물
+build/
+.build/
+dist/
+*.dSYM/
+*.o
+*.swiftmodule
+*.swiftdoc
+*.swiftsourceinfo
+
+# Windows (.NET)
+windows/**/bin/
+windows/**/obj/
+windows/**/*.user
+windows/**/publish/
+
+# macOS / 편집기
+.DS_Store
+*.xcuserdata/
+xcuserdata/
+.swiftpm/
+.vscode/
+.idea/
+*.log
