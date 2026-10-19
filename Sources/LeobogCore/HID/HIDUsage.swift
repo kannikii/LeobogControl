@@ -16,6 +16,12 @@ public struct HIDUsage: Hashable, Codable, Sendable, CustomStringConvertible {
     public static let appleFn = HIDUsage(page: 0xFF, usage: 0x03)
     /// 키 비활성화용 (hidutil 에서 Dst 를 0x700000000 으로 주면 아무 동작도 하지 않음)
     public static let disabled = HIDUsage(page: 0x07, usage: 0x00)
+    /// Apple 벤더 키보드 페이지 (kHIDPage_AppleVendorKeyboard 0xFF01): Spotlight · Mission Control · Launchpad 등
+    public static func appleKeyboard(_ u: UInt32) -> HIDUsage { HIDUsage(page: 0xFF01, usage: u) }
+    /// Apple 벤더 탑케이스 페이지 (kHIDPage_AppleVendorTopCase 0xFF): 키보드 조명 등
+    public static func appleTopCase(_ u: UInt32) -> HIDUsage { HIDUsage(page: 0xFF, usage: u) }
+    /// 방해금지 (HID Usage Tables 1.3+ Generic Desktop 0x9B — Magic Keyboard with Touch ID 의 F6 키가 보내는 usage)
+    public static let doNotDisturb = HIDUsage(page: 0x01, usage: 0x9B)
 
     /// hidutil UserKeyMapping 에서 쓰는 64비트 값 ((page << 32) | usage)
     public var hidutilValue: UInt64 { (UInt64(page) << 32) | UInt64(usage) }
@@ -85,10 +91,13 @@ public enum HIDUsageNames {
         0x7C: ("KB조명", "키보드 백라이트 토글"),
         0xB0: ("Play", "재생"), 0xB1: ("Pause", "일시정지"), 0xB2: ("Rec", "녹음"), 0xB3: ("FF", "빨리 감기"), 0xB4: ("Rew", "되감기"),
         0xB5: ("⏭", "다음 곡"), 0xB6: ("⏮", "이전 곡"), 0xB7: ("⏹", "정지"), 0xB8: ("⏏", "꺼내기(Eject)"),
-        0xCD: ("⏯", "재생/일시정지"), 0xE2: ("🔇", "음소거"), 0xE9: ("🔊+", "볼륨 높이기"), 0xEA: ("🔉-", "볼륨 낮추기"),
+        0xCD: ("⏯", "재생/일시정지"), 0xCF: ("받아쓰기", "받아쓰기 / Siri (Voice Command — Magic Keyboard F5)"),
+        0xE2: ("🔇", "음소거"), 0xE9: ("🔊+", "볼륨 높이기"), 0xEA: ("🔉-", "볼륨 낮추기"),
+        0x19E: ("🔒잠금", "화면 잠금 (Terminal Lock / Screensaver — Touch ID 없는 Magic Keyboard 의 🔒 키)"),
         0x183: ("Media", "미디어 플레이어"), 0x18A: ("Mail", "메일"), 0x192: ("Calc", "계산기"), 0x194: ("PC", "내 컴퓨터/파일"),
         0x221: ("Search", "검색"), 0x223: ("Home", "브라우저 홈"), 0x224: ("Back", "뒤로"), 0x225: ("Fwd", "앞으로"),
         0x226: ("Stop", "브라우저 정지"), 0x227: ("Refresh", "새로 고침"), 0x22A: ("Fav", "즐겨찾기"),
+        0x29D: ("입력소스", "AC Keyboard Layout Select (입력 소스 전환)"),
         0x29F: ("Mission", "Mission Control(AC Desktop Show All)"), 0x2A2: ("Apps", "AC Desktop Show All Applications"),
     ]
 
@@ -96,13 +105,29 @@ public enum HIDUsageNames {
         switch u.page {
         case 0x07: return keyboard[u.usage]?.0 ?? String(format: "K%02X", u.usage)
         case 0x0C: return consumer[u.usage]?.0 ?? String(format: "C%X", u.usage)
-        case 0xFF where u.usage == 0x03: return "Fn🌐"
+        case 0x01 where u.usage == 0x9B: return "방해금지"
+        case 0xFF:
+            switch u.usage {
+            case 0x03: return "Fn🌐"
+            case 0x04: return "밝기+"
+            case 0x05: return "밝기-"
+            case 0x06: return "미러링"
+            case 0x07: return "KB조명"
+            case 0x08: return "KB밝기+"
+            case 0x09: return "KB밝기-"
+            default: return String(format: "TC%X", u.usage)
+            }
         case 0xFF01:
             switch u.usage {
             case 0x01: return "Spotlight"
             case 0x02: return "Dashboard"
+            case 0x03: return "Fn"
             case 0x04: return "Launchpad"
             case 0x10: return "Mission"
+            case 0x11: return "데스크탑"
+            case 0x20: return "밝기+"
+            case 0x21: return "밝기-"
+            case 0x30: return "언어"
             default: return String(format: "AV%X", u.usage)
             }
         default: return String(format: "%X:%X", u.page, u.usage)
@@ -113,13 +138,29 @@ public enum HIDUsageNames {
         switch u.page {
         case 0x07: return keyboard[u.usage]?.1 ?? String(format: "키보드 usage 0x%02X", u.usage)
         case 0x0C: return consumer[u.usage]?.1 ?? String(format: "소비자(미디어) usage 0x%X", u.usage)
-        case 0xFF where u.usage == 0x03: return "Fn / 🌐 (Globe)"
+        case 0x01 where u.usage == 0x9B: return "방해금지 (집중 모드 — Magic Keyboard F6, Generic Desktop 0x9B)"
+        case 0xFF:
+            switch u.usage {
+            case 0x03: return "Fn / 🌐 (Globe)"
+            case 0x04: return "화면 밝기 높이기 (Apple 탑케이스)"
+            case 0x05: return "화면 밝기 낮추기 (Apple 탑케이스)"
+            case 0x06: return "디스플레이 미러링 (Apple 탑케이스)"
+            case 0x07: return "키보드 조명 토글 (Apple 탑케이스)"
+            case 0x08: return "키보드 조명 밝게 (Apple 탑케이스)"
+            case 0x09: return "키보드 조명 어둡게 (Apple 탑케이스)"
+            default: return String(format: "Apple 탑케이스 usage 0x%X", u.usage)
+            }
         case 0xFF01:
             switch u.usage {
-            case 0x01: return "Spotlight (Apple 벤더)"
+            case 0x01: return "Spotlight (Apple 벤더 — Magic Keyboard F4)"
             case 0x02: return "Dashboard (Apple 벤더)"
-            case 0x04: return "Launchpad (Apple 벤더)"
-            case 0x10: return "Mission Control (Apple 벤더)"
+            case 0x03: return "Function (Apple 벤더)"
+            case 0x04: return "Launchpad (Apple 벤더 — 구형 Apple 키보드 F4)"
+            case 0x10: return "Mission Control (Apple 벤더 — Magic Keyboard F3)"
+            case 0x11: return "데스크탑 보기 (Exposé Desktop, Apple 벤더)"
+            case 0x20: return "화면 밝기 높이기 (Apple 벤더 키보드)"
+            case 0x21: return "화면 밝기 낮추기 (Apple 벤더 키보드)"
+            case 0x30: return "언어 전환 (Apple 벤더 키보드)"
             default: return String(format: "Apple 벤더 키보드 usage 0x%X", u.usage)
             }
         default: return String(format: "usage page 0x%X / usage 0x%X", u.page, u.usage)
@@ -139,7 +180,17 @@ public enum RemapTargets {
         func kb(_ r: ClosedRange<UInt32>) -> [HIDUsage] { r.map { HIDUsage.keyboard($0) } }
         func kb(_ a: [UInt32]) -> [HIDUsage] { a.map { HIDUsage.keyboard($0) } }
         func cs(_ a: [UInt32]) -> [HIDUsage] { a.map { HIDUsage.consumer($0) } }
+        // Magic Keyboard with Touch ID 상단열 F1–F12 순서: 밝기- · 밝기+ · Mission Control · Spotlight · 받아쓰기 · 방해금지 · ⏮ ⏯ ⏭ · 🔇 🔉 🔊
+        let magicRow: [HIDUsage] = [.consumer(0x70), .consumer(0x6F), .appleKeyboard(0x10), .appleKeyboard(0x01),
+                                    .consumer(0xCF), .doNotDisturb,
+                                    .consumer(0xB6), .consumer(0xCD), .consumer(0xB5),
+                                    .consumer(0xE2), .consumer(0xEA), .consumer(0xE9)]
+        // 그 밖의 Mac 전용 기능: Launchpad(구형 F4) · 데스크탑 보기 · 화면 잠금 · 키보드 조명 · 입력 소스
+        let macExtra: [HIDUsage] = [.appleKeyboard(0x04), .appleKeyboard(0x11), .consumer(0x19E),
+                                    .appleTopCase(0x08), .appleTopCase(0x09), .appleTopCase(0x07), .consumer(0x29D)]
         return [
+            RemapTargetGroup(id: "mac", title: "macOS 기능 키 (Magic Keyboard 상단열 F1–F12 순)", items: magicRow),
+            RemapTargetGroup(id: "macx", title: "macOS 기능 키 (그 밖에)", items: macExtra),
             RemapTargetGroup(id: "mod", title: "수정자 키", items: kb(0xE0...0xE7) + [.appleFn]),
             RemapTargetGroup(id: "edit", title: "편집 · 이동", items: kb([0x29, 0x2B, 0x39, 0x2C, 0x28, 0x2A, 0x4C, 0x49, 0x4A, 0x4D, 0x4B, 0x4E, 0x50, 0x52, 0x51, 0x4F, 0x46, 0x47, 0x48, 0x65])),
             RemapTargetGroup(id: "fn", title: "기능 키 F1–F24", items: kb(0x3A...0x45) + kb(0x68...0x73)),

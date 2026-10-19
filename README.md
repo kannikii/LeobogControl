@@ -113,6 +113,8 @@ Get-FileHash .\LeobogControl-Windows-1.0.0.zip -Algorithm SHA256   # Windows
 
 키보드 그림에서 키를 누르고 → 오른쪽 목록에서 대상 키를 고른 뒤 → **시스템에 적용**.
 
+오른쪽 목록 맨 위의 **macOS 기능 키** 두 그룹에는 Magic Keyboard 상단열 순서(밝기 · Mission Control · Spotlight · 받아쓰기 · **방해금지** · 미디어 · 볼륨)와 그 밖의 Mac 기능(Launchpad · 데스크탑 보기 · 화면 잠금 · 키보드 조명 · 입력 소스)이 있어 아무 키나 그 기능으로 바꿀 수 있습니다.
+
 - 원리: macOS 내장 `hidutil` 의 장치 한정 `UserKeyMapping` 을 **VID/PID 로 이 키보드에만** 적용합니다. MacBook 내장 키보드나 다른 키보드에는 영향이 없습니다.
 - 저장 위치: `~/Library/Application Support/LeobogControl/remaps.json` (Windows 앱과 같은 형식)
 - 블루투스가 끊겼다 다시 붙으면 hidutil 매핑이 사라집니다. **"재연결 시 자동 재적용"** 을 켜면 LaunchAgent(`com.leobog.control.remap`)가 `leobog-cli watch` 를 띄워 두고 키보드가 다시 연결될 때마다 저장된 매핑을 다시 적용합니다. **"시스템에 적용"** 이 이 파일을 저장하고, **"시스템 매핑 해제"** 와 **"목록 비우기"** 는 저장 파일도 비웁니다 — 그래야 다음 재연결 때 방금 지운 매핑이 되살아나지 않습니다. LaunchAgent 는 `leobog-cli` 실행 파일이 있을 때만 유지되도록(`KeepAlive` → `PathState`) 등록되어, 앱을 지워도 launchd 가 없는 프로그램을 계속 재시작하려 들지 않습니다.
