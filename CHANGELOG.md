@@ -5,10 +5,12 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-19
+
 ### 추가
 - 장치 탭 배터리 카드에 **키보드에서 직접 읽기**: 앱이 CoreBluetooth 로 BLE GATT Battery Service(0x180F / 0x2A19) 를 1분마다 읽고, 펌웨어가 지원하면 notify 도 구독한다. macOS 가 보여 주는 값(system_profiler)은 bluetoothd 가 연결 시점에 한 번 읽은 뒤 키보드가 알려 줄 때만 바뀌어, Hi8SE 처럼 notify 를 보내지 않는 펌웨어에선 며칠째 100% 에 머문다. 처음 한 번 macOS 블루투스 권한 대화상자가 뜨며(`NSBluetoothAlwaysUsageDescription`), 허용된 뒤로는 앱이 시작할 때 자동으로 읽는다. 키보드에 쓰는 동작은 없다. 사이드바 하단 배터리 표시도 직접 읽은 값을 우선한다.
 - README 에 macOS 앱 실제 스크린샷(탭별 7장) 추가. `scripts/screenshots.sh` 로 다시 찍을 수 있고, 앱은 `-automation` 인자로 실행했을 때만 캡처 알림(`com.leobog.control.automation`)을 받는다.
-- 키 매핑 대상 목록에 **macOS 기능 키** 두 그룹 추가. 첫 그룹은 Magic Keyboard(Touch ID) 상단열 F1–F12 순 — 밝기− / 밝기+ / Mission Control / Spotlight / 받아쓰기 / **방해금지** / 이전 곡 / 재생·일시정지 / 다음 곡 / 음소거 / 볼륨− / 볼륨+. 둘째 그룹은 그 밖의 Mac 기능 — Launchpad / 데스크탑 보기 / 화면 잠금(🔒) / 키보드 조명 밝기·토글 / 입력 소스 전환. 방해금지는 HID Usage Tables 1.3 의 Generic Desktop 0x9B, 밝기·Mission Control·Spotlight·Launchpad 는 Apple 벤더 페이지(0xFF01), 키보드 조명은 Apple 탑케이스 페이지(0xFF) usage 로 보낸다. Apple 벤더·탑케이스·Generic Desktop usage 의 한국어 이름 표기도 함께 확장.
+- 키 매핑 대상 목록에 **macOS 기능 키** 두 그룹 추가. 첫 그룹은 Magic Keyboard(Touch ID) 상단열 F1–F12 순 — 밝기− / 밝기+ / Mission Control / Spotlight / 받아쓰기 / **방해금지** / 이전 곡 / 재생·일시정지 / 다음 곡 / 음소거 / 볼륨− / 볼륨+. 둘째 그룹은 그 밖의 Mac 기능 — Launchpad / 데스크탑 보기 / 화면 잠금(🔒) / 키보드 조명 밝기·토글 / 입력 소스 전환. 방해금지는 HID Usage Tables 1.3 의 Generic Desktop 0x9B, 밝기·Mission Control·Spotlight·Launchpad 는 Apple 벤더 페이지(0xFF01), 키보드 조명은 Apple 탑케이스 페이지(0xFF) usage 로 보낸다. Apple 벤더·탑케이스·Generic Desktop usage 의 한국어 이름 표기도 함께 확장. 방해금지 매핑은 Hi8SE 실기에서 hidutil 로 적용해 집중 모드가 켜지는 것까지 확인했다.
 
 ### 변경
 - macOS 앱 기본 창 크기를 1240×880 으로 키우고 최소 1040×720 으로 제한. 키 테스터 탭이 기본 창에서 아래가 잘리지 않고 다 보인다 (이전에 저장된 창 크기는 무시되고 새 기본값으로 뜬다).

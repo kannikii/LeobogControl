@@ -16,7 +16,7 @@
     <RootNamespace>LeobogControl</RootNamespace>
     <ApplicationIcon>Resources/app.ico</ApplicationIcon>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>Leobog Control</Product>
     <Description>LEOBOG Hi8SE 키보드 제어 도구 (비공식)</Description>
     <Copyright>Leobog Hi8SE 제어 도구 (비공식)</Copyright>

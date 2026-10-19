@@ -72,7 +72,7 @@ shasum -a 256 -c SHA256SUMS.txt        # macOS
 ```
 
 ```powershell
-Get-FileHash .\LeobogControl-Windows-1.0.0.zip -Algorithm SHA256   # Windows
+Get-FileHash .\LeobogControl-Windows-x.y.z.zip -Algorithm SHA256   # Windows
 ```
 
 ---
