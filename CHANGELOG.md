@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### 추가
+- README 에 macOS 앱 실제 스크린샷(탭별 7장) 추가. `scripts/screenshots.sh` 로 다시 찍을 수 있고, 앱은 `-automation` 인자로 실행했을 때만 캡처 알림(`com.leobog.control.automation`)을 받는다.
+
 ## [1.0.0] - 2026-10-19
 
 ### 추가

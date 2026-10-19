@@ -15,6 +15,9 @@ LEOBOG **Hi8SE** 키보드를 설정하는 비공식 도구입니다. **macOS �
 
 > **비공식 프로젝트입니다.** LEOBOG 와 무관하며, 벤더 프로토콜은 공개된 오픈소스 분석과 공식 드라이버의 설정 파일을 바탕으로 구현했습니다. 쓰기 명령(조명 적용·플래시 저장)은 키보드가 프로브에 응답한 뒤에만 보내도록 막아 두었지만, 사용에 따른 책임은 사용자에게 있습니다.
 
+<p align="center"><img src="docs/screenshots/macos-remap.png" width="840" alt="Leobog Control macOS 앱 — 키 매핑 탭"></p>
+<p align="center"><sub>macOS 앱의 키 매핑 탭. 아래 스크린샷은 모두 블루투스로 연결한 Hi8SE 와 실제로 찍은 macOS 앱 화면입니다. (Windows 앱은 이 Mac 에서 실행할 수 없어 스크린샷이 없습니다.)</sub></p>
+
 ---
 
 ## 목차
@@ -90,14 +93,23 @@ Get-FileHash .\LeobogControl-Windows-1.0.0.zip -Algorithm SHA256   # Windows
 ### 2.2 탭별 기능
 
 #### 장치
+
+<img src="docs/screenshots/macos-device.png" width="760" alt="장치 탭 — 연결 상태, 배터리, HID 정보, 권한">
+
 연결 상태, 배터리 잔량(블루투스 시스템 정보에서 읽음, 2분마다 갱신), HID 장치 정보(VID/PID, 리포트 크기, usage 쌍), 권한 상태.
 
 #### 키 테스터
+
+<img src="docs/screenshots/macos-tester.png" width="760" alt="키 테스터 탭 — 눌린 키가 키보드 그림에 켜짐">
+
 키보드 그림 위에서 지금 눌린 키가 켜지고, 최근 입력(usage 코드 포함)이 목록으로 쌓입니다. 노브 돌리기/누르기도 소비자(consumer) usage 로 잡힙니다. 매핑을 적용한 키는 주황색 테두리와 `→대상` 라벨로 표시됩니다.
 
 오른쪽 위 **키보드 모드** 선택기(Mac 모드 / Windows 모드)는 키보드 펌웨어 모드에 맞춰 하단열 그림을 바꿉니다 ([5. 키보드 모드와 하단열](#5-키보드-모드와-하단열)). "배열표에 없는 입력" 카드는 선택한 모드와 펌웨어 모드가 다를 때 쌓입니다.
 
 #### 키 매핑
+
+<img src="docs/screenshots/macos-remap.png" width="760" alt="키 매핑 탭 — 키 선택, 대상 키 목록, 프리셋">
+
 키보드 그림에서 키를 누르고 → 오른쪽 목록에서 대상 키를 고른 뒤 → **시스템에 적용**.
 
 - 원리: macOS 내장 `hidutil` 의 장치 한정 `UserKeyMapping` 을 **VID/PID 로 이 키보드에만** 적용합니다. MacBook 내장 키보드나 다른 키보드에는 영향이 없습니다.
@@ -116,14 +128,23 @@ Get-FileHash .\LeobogControl-Windows-1.0.0.zip -Algorithm SHA256   # Windows
 | `del-fwd` | 오른쪽 위 Del → Backspace |
 
 #### 단축키 · Fn 레이어
+
+<img src="docs/screenshots/macos-shortcuts.png" width="760" alt="단축키 · Fn 레이어 탭">
+
 키보드 펌웨어의 Fn 조합을 분류별로 보여 줍니다 ([6. Fn 조합 참고표](#6-fn-조합단축키-참고표)). 입력 모니터링 권한이 있으면 실제로 Mac 에 도착한 usage 와 대조해 ✓ 를 찍어 줍니다. "추정" 배지는 드라이버 기능 코드만 있고 의미를 확정하지 못한 항목입니다.
 
 #### 펑션키
+
+<img src="docs/screenshots/macos-fnkeys.png" width="760" alt="펑션키 탭">
+
 - **F1–F12 를 표준 기능 키로 사용** 토글: macOS 의 `com.apple.keyboard.fnState` 를 바꿉니다(시스템 설정 → 키보드의 같은 항목). 켜면 F 열이 항상 F1–F12 로 들어가고, 미디어 동작은 키보드 Fn 조합으로만 나갑니다.
 - F 열 매핑 프리셋(`f-media`, `f-bright`)을 여기서도 바로 적용/해제할 수 있습니다.
 - **macOS Fn(🌐) 키 만들기**: 키보드 자체 Fn 키는 펌웨어 전용이라 바꿀 수 없으므로, Mac 모드에서는 스페이스 바로 오른쪽 키(오른쪽 ⌘)를 macOS Fn/🌐 로 매핑하는 버튼(`rcmd-fn`)을 제공합니다. 받아쓰기·이모지·fn+화살표 등이 그 키로 동작하고, 키보드 Fn 조합은 그대로 유지됩니다.
 
 #### 조명 (RGB)
+
+<img src="docs/screenshots/macos-lighting.png" width="760" alt="조명 탭 — 효과, 밝기/속도, 색">
+
 20가지 효과(공식 드라이버 KB.ini 의 LedOpt 목록, 한국어 이름), 밝기/속도 0–4, 랜덤 색, 사용자 색, 프리셋 색을 고르고 **키보드에 적용** 을 누르면 벤더 채널(report `0x13`, Compx 계열 프로토콜)로 전송합니다.
 
 > **블루투스에서는 동작하지 않습니다 (2026-10-19 실측).** 블루투스 모드의 키보드는 벤더 채널 조회(`0x05` 장치 정보)에 응답하지 않았습니다(3회 재시도 모두 시간 초과, 하트비트 없음). 앱은 안전장치로, 진단 탭의 "연결 확인" 에서 응답이 확인되기 전에는 조명 쓰기 명령을 보내지 않습니다.
@@ -131,6 +152,9 @@ Get-FileHash .\LeobogControl-Windows-1.0.0.zip -Algorithm SHA256   # Windows
 > 지금 쓸 수 있는 방법: ① 키보드 자체 단축키(Fn + Tab 효과, Fn + ↑/↓ 밝기, Fn + ←/→ 속도, Fn + \ 색). ② 동글을 꽂은 Windows 쪽에서 이 프로젝트의 Windows 앱이나 공식 드라이버로 설정하면 키보드 내부에 저장되므로 블루투스 모드로 바꿔도 보통 유지됩니다. ③ 키보드를 USB 케이블이나 동글로 Mac 에 직접 연결한 뒤 진단 탭 → "연결 확인" 이 응답하면 조명 탭이 그대로 동작합니다.
 
 #### 진단 · 벤더 채널
+
+<img src="docs/screenshots/macos-diagnostics.png" width="760" alt="진단 탭 — 읽기 전용 명령과 패킷 로그">
+
 읽기 전용 명령(연결 확인 `0x05`, 키맵 레이어 읽기 `0x41`, 조명 읽기 `0x49`, 프로필 `0x44`)과 패킷 로그, 체크섬 방식 자동 감지 결과를 보여 줍니다.
 
 #### 크래시 · 메모리 모니터
@@ -169,6 +193,8 @@ alias leobog='"/Applications/Leobog Control.app/Contents/MacOS/leobog-cli"'
 ## 4. Windows 앱
 
 `LeobogControl.exe` 하나로 동작합니다 (.NET 7 WinForms, 런타임 동봉). 동글 또는 USB 로 연결한 키보드를 VID `0x3554` 로 찾습니다.
+
+> 이 README 의 스크린샷은 모두 macOS 앱입니다. Windows 앱은 같은 탭 구성(장치 · 키 테스터 · 키 매핑 · 단축키 · 조명 · 진단)을 WinForms 로 옮긴 것으로, 화면 구성은 비슷하지만 생김새는 다릅니다.
 
 ### 4.1 macOS 버전과 다른 점
 
@@ -372,6 +398,7 @@ Sources/LeobogCore/              macOS 공용 모듈
   Data/                          Fn 레이어 참고표, 조명 효과 목록
   Diagnostics/                   동작 기록(app.log), 메모리 통계, .ips 크래시 리포트 파서
 Sources/LeobogControl/           SwiftUI 앱 (탭별 View)
+  AutomationHook.swift           README 스크린샷용 자기 창 캡처 훅 (`-automation` 인자로 실행했을 때만 동작)
 Sources/leobog-cli/              커맨드라인 도구 (LaunchAgent 의 watch 포함)
 windows/LeobogControl.Windows/   Windows 앱 (.NET 7 WinForms)
   Core/                          HidSharp 장치 관리, Compx 프로토콜, Scancode Map, Raw Input, 레이아웃·참고표
@@ -381,6 +408,8 @@ scripts/build-app.sh             macOS 빌드·번들·서명·설치
 scripts/release.sh               버전 올리기 · 로컬 패키징 · 태그
 scripts/crash-monitor.sh         macOS 크래시 리포트 요약
 scripts/make-icon.swift          macOS 아이콘 생성
+scripts/screenshots.sh           README 스크린샷 다시 찍기 (docs/screenshots/, screenshot-post.swift 사용)
+docs/screenshots/                README 에 쓰는 macOS 앱 스크린샷 (1120×740)
 .github/workflows/ci.yml         push/PR 빌드 검사 (macOS + Windows)
 .github/workflows/release.yml    태그 푸시 시 빌드 + GitHub Release
 ```
