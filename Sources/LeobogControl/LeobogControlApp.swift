@@ -39,6 +39,7 @@ struct LeobogControlApp: App {
                 .environmentObject(model.remap)
                 .environmentObject(model.fn)
                 .environmentObject(model.battery)
+                .environmentObject(model.bleBattery)
                 .frame(minWidth: 1040, minHeight: 720)
         }
         .defaultSize(width: 1240, height: 880)

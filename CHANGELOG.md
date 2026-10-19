@@ -6,6 +6,7 @@
 ## [Unreleased]
 
 ### 추가
+- 장치 탭 배터리 카드에 **키보드에서 직접 읽기**: 앱이 CoreBluetooth 로 BLE GATT Battery Service(0x180F / 0x2A19) 를 1분마다 읽고, 펌웨어가 지원하면 notify 도 구독한다. macOS 가 보여 주는 값(system_profiler)은 bluetoothd 가 연결 시점에 한 번 읽은 뒤 키보드가 알려 줄 때만 바뀌어, Hi8SE 처럼 notify 를 보내지 않는 펌웨어에선 며칠째 100% 에 머문다. 처음 한 번 macOS 블루투스 권한 대화상자가 뜨며(`NSBluetoothAlwaysUsageDescription`), 허용된 뒤로는 앱이 시작할 때 자동으로 읽는다. 키보드에 쓰는 동작은 없다. 사이드바 하단 배터리 표시도 직접 읽은 값을 우선한다.
 - README 에 macOS 앱 실제 스크린샷(탭별 7장) 추가. `scripts/screenshots.sh` 로 다시 찍을 수 있고, 앱은 `-automation` 인자로 실행했을 때만 캡처 알림(`com.leobog.control.automation`)을 받는다.
 
 ### 변경

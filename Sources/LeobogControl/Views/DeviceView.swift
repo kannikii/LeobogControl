@@ -5,8 +5,37 @@ struct DeviceView: View {
     @EnvironmentObject var model: AppModel
     @EnvironmentObject var hid: HIDDeviceManager
     @EnvironmentObject var battery: BatteryService
+    @EnvironmentObject var ble: BLEBatteryReader
     @EnvironmentObject var remap: HidutilRemapService
     @EnvironmentObject var compx: CompxClient
+
+
+    /// 앱이 BLE GATT Battery Service 에서 직접 읽는 값. 시스템 값은 키보드가 notify 를 안 보내면 연결 시점 값(흔히 100%)에 머문다.
+    @ViewBuilder private var directBatterySection: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("키보드에서 직접 읽기 (BLE Battery Service 0x2A19)").font(.subheadline.bold())
+            InfoRow(label: "배터리 (직접)", value: ble.percent.map { "\($0)%" } ?? "—")
+            InfoRow(label: "상태", value: ble.phase.label)
+            if let t = ble.lastRead {
+                InfoRow(label: "마지막 읽기", value: "\(t.formatted(date: .omitted, time: .standard)) · \(ble.readCount)회 · 1분마다" + (ble.supportsNotify ? " + notify 구독" : " (펌웨어가 notify 미지원)"))
+            }
+            if ble.history.count > 1 {
+                InfoRow(label: "값 변화", value: ble.history.suffix(6).map { "\($0.1)% (\($0.0.formatted(date: .omitted, time: .shortened)))" }.joined(separator: " → "))
+            }
+            HStack {
+                if ble.isRunning {
+                    Button("지금 읽기") { ble.readNow() }
+                    Button("중지") { ble.stop() }
+                } else {
+                    Button("직접 읽기 시작") { ble.start() }.buttonStyle(.borderedProminent)
+                        .help("처음 한 번 macOS 블루투스 권한 대화상자가 뜹니다. 허용하면 다음 실행부터 자동으로 시작합니다.")
+                }
+                Text("블루투스 권한: \(BLEBatteryReader.authorizationLabel)").font(.caption).foregroundStyle(.secondary)
+            }
+            Text("macOS 는 연결할 때 배터리 특성을 한 번 읽고 그 뒤로는 키보드가 알려 줄 때만 갱신합니다. 값이 며칠째 그대로면 펌웨어가 변화를 알리지 않는 것이고, 여기서 직접 읽은 값이 실제 잔량입니다. 직접 읽은 값도 그대로면 펌웨어가 보고하는 값 자체가 거친 것입니다 (키보드에서 Fn + Space 를 길게 눌러 LED 표시와 비교해 보세요).")
+                .font(.caption).foregroundStyle(.secondary)
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -49,10 +78,10 @@ struct DeviceView: View {
                     }
                 }
 
-                Card(title: "배터리 · 블루투스", subtitle: "system_profiler 기준, 2분마다 갱신") {
+                Card(title: "배터리 · 블루투스", subtitle: "macOS 가 보여 주는 값(system_profiler, 2분마다 갱신)과 앱이 키보드에서 직접 읽은 값") {
                     if let s = battery.status {
                         InfoRow(label: "장치 이름", value: s.name)
-                        InfoRow(label: "배터리", value: s.batteryPercent.map { "\($0)%" } ?? "정보 없음")
+                        InfoRow(label: "배터리 (시스템)", value: s.batteryPercent.map { "\($0)%" } ?? "정보 없음")
                         InfoRow(label: "연결", value: s.connected ? "연결됨" : "연결 안 됨")
                         InfoRow(label: "주소", value: s.address)
                         if !s.firmware.isEmpty { InfoRow(label: "펌웨어", value: s.firmware) }
@@ -64,6 +93,8 @@ struct DeviceView: View {
                         Button("새로 고침") { battery.refresh() }.disabled(battery.refreshing)
                         if let t = battery.lastUpdated { Text("마지막 갱신 \(t.formatted(date: .omitted, time: .standard))").font(.caption).foregroundStyle(.secondary) }
                     }
+                    Divider()
+                    directBatterySection
                 }
 
                 Card(title: "HID 장치 정보") {

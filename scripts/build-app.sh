@@ -39,7 +39,7 @@ swiftc "${COMMON[@]}" -parse-as-library -module-name LeobogCore \
 
 echo "[2/3] LeobogControl 앱"
 swiftc "${COMMON[@]}" -parse-as-library -module-name LeobogControl \
-  -I "$OBJ" -L "$OBJ" -lLeobogCore -framework IOKit -framework AppKit -framework SwiftUI -framework Combine \
+  -I "$OBJ" -L "$OBJ" -lLeobogCore -framework IOKit -framework AppKit -framework SwiftUI -framework Combine -framework CoreBluetooth \
   -o "$OBJ/LeobogControl" \
   Sources/LeobogControl/*.swift Sources/LeobogControl/Views/*.swift
 

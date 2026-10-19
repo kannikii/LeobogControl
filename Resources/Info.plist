@@ -34,5 +34,7 @@
 	<false/>
 	<key>NSSupportsSuddenTermination</key>
 	<false/>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>키보드의 배터리 잔량을 BLE Battery Service 에서 직접 읽기 위해 블루투스 접근이 필요합니다. 키보드에 아무것도 쓰지 않습니다.</string>
 </dict>
 </plist>

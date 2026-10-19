@@ -35,6 +35,7 @@ final class AppModel: ObservableObject {
     let remap = HidutilRemapService()
     let fn = FnKeyService()
     let battery = BatteryService()
+    let bleBattery = BLEBatteryReader(pollInterval: 60) { AppLog.shared.log("ble", $0) }
 
     @Published var section: SidebarSection = .device {
         didSet { if section != oldValue { AppLog.shared.log("ui", "화면 전환: \(oldValue.rawValue) → \(section.rawValue)") } }
@@ -100,6 +101,8 @@ final class AppModel: ObservableObject {
         hid.start()
         AppLog.shared.log("hid", "매니저 시작 · 권한 \(hid.permission.rawValue)")
         battery.startAutoRefresh(interval: 120)
+        // 블루투스 권한이 이미 허용된 경우에만 자동 시작 — 아니면 장치 탭의 버튼으로 (시스템 대화상자가 뜬다)
+        if BLEBatteryReader.isAuthorized { bleBattery.start() } else { AppLog.shared.log("ble", "블루투스 권한 \(BLEBatteryReader.authorizationLabel) — 직접 읽기는 수동 시작 대기") }
         remap.refreshFromSystem()
 
         // 권한이 없으면 앱 이름으로 요청 (기록이 없을 때만 시스템 대화상자가 뜬다)

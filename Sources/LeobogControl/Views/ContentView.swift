@@ -5,6 +5,7 @@ struct ContentView: View {
     @EnvironmentObject var model: AppModel
     @EnvironmentObject var hid: HIDDeviceManager
     @EnvironmentObject var battery: BatteryService
+    @EnvironmentObject var ble: BLEBatteryReader
 
     var body: some View {
         NavigationSplitView {
@@ -60,10 +61,11 @@ struct ContentView: View {
                 Text(hid.devices.isEmpty ? "키보드 없음" : (hid.isOpen ? "연결됨 · 입력 감시 중" : "연결됨 · 권한 대기"))
                     .font(.caption)
             }
-            if let b = battery.status?.batteryPercent {
+            // 앱이 직접 읽은 값이 있으면 그것을 우선 (시스템 값은 notify 없는 펌웨어에선 오래 묵는다)
+            if let b = ble.percent ?? battery.status?.batteryPercent {
                 HStack(spacing: 4) {
                     Image(systemName: b > 80 ? "battery.100" : b > 50 ? "battery.75" : b > 25 ? "battery.50" : "battery.25")
-                    Text("배터리 \(b)%")
+                    Text("배터리 \(b)%" + (ble.percent != nil ? " · 직접 읽음" : " · 시스템"))
                 }.font(.caption).foregroundStyle(.secondary)
             }
         }
