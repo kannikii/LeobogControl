@@ -9,23 +9,31 @@ struct KeyTesterView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                if hid.isOpen {
-                    Label("HID 입력 리포트로 실시간 확인 중 — 아무 키나 눌러 보세요 (Fn 조합, 노브 포함). 방향키·Tab 도 이 화면이 받습니다 (⌘ 조합 제외)", systemImage: "dot.radiowaves.left.and.right").foregroundStyle(.green)
-                } else {
-                    Label("권한 없음: 이 창이 앞에 있을 때만 키를 볼 수 있습니다 (NSEvent). 전체 기능은 입력 모니터링 권한 허용 후.", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
+            // 상태 문구는 두 줄까지 접고, 오른쪽 컨트롤은 고정 폭으로 두어 서로 겹치지 않게 한다
+            HStack(alignment: .center, spacing: 12) {
+                Group {
+                    if hid.isOpen {
+                        Label("HID 리포트로 실시간 확인 중 — 아무 키나 눌러 보세요 (Fn 조합·노브 포함, ⌘ 조합 제외)", systemImage: "dot.radiowaves.left.and.right").foregroundStyle(.green)
+                    } else {
+                        Label("권한 없음: 이 창이 앞에 있을 때만 키를 볼 수 있습니다. 전체 기능은 입력 모니터링 허용 후.", systemImage: "exclamationmark.triangle").foregroundStyle(.orange)
+                    }
                 }
-                Spacer()
-                Picker("키보드 모드", selection: $model.keyboardMode) {
-                    ForEach(KeyboardMode.allCases) { Text($0.label).tag($0) }
+                .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+                Spacer(minLength: 8)
+                HStack(spacing: 8) {
+                    Text("키보드 모드").foregroundStyle(.secondary)
+                    Picker("키보드 모드", selection: $model.keyboardMode) {
+                        ForEach(KeyboardMode.allCases) { Text($0.label).tag($0) }
+                    }
+                    .labelsHidden().pickerStyle(.segmented).frame(width: 200)
+                    .help("키보드에서 Fn + M 으로 전환하는 펌웨어 모드. 하단열(⌥ / ⌘ / Fn) 배열이 달라집니다.")
+                    Button("기록 지우기") { model.clearEvents(); everPressed.removeAll() }
                 }
-                .pickerStyle(.segmented).frame(width: 210)
-                .help("키보드에서 Fn + M 으로 전환하는 펌웨어 모드. 하단열(⌥ / ⌘ / Fn) 배열이 달라집니다.")
-                Button("기록 지우기") { model.clearEvents(); everPressed.removeAll() }
+                .fixedSize()
             }.font(.callout)
 
             KeyboardDiagramView(keys: model.layoutKeys, pressed: model.pressedKeyIDs, remapped: remapLabels, highlighted: everPressed)
-                .frame(maxHeight: 330)
+                .frame(maxHeight: 300)
                 .onChange(of: model.pressedKeyIDs) { _, new in everPressed.formUnion(new) }
                 .onChange(of: model.keyboardMode) { _, _ in everPressed.removeAll() }
 
@@ -43,9 +51,11 @@ struct KeyTesterView: View {
                                 Text(ev.isDown ? "눌림" : "뗌").foregroundStyle(ev.isDown ? .green : .secondary).font(.caption)
                             }.id(ev.id)
                         }
-                        .frame(minHeight: 160)
+                        .frame(minHeight: 160, maxHeight: .infinity)
                     }
                 }
+                // 오른쪽 카드 묶음은 스크롤 영역에 넣어 창이 작아도 전체 레이아웃이 세로로 넘치지 않게 한다
+                ScrollView(.vertical) {
                 VStack(alignment: .leading, spacing: 12) {
                     Card(title: "키보드 자체 Fn 키", subtitle: fnKeyPosition) {
                         Text("펌웨어가 직접 처리하는 키라 혼자 누르면 맥으로 아무 입력도 오지 않습니다 — 다이어그램에 안 켜지는 것이 정상입니다. 조합으로만 보입니다:")
@@ -91,9 +101,12 @@ struct KeyTesterView: View {
                         }
                     }
                 }
-                .frame(width: 320)
+                }
+                .frame(width: 340)
             }
+            .frame(maxHeight: .infinity)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(16)
     }
 

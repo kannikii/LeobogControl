@@ -102,7 +102,7 @@ Get-FileHash .\LeobogControl-Windows-1.0.0.zip -Algorithm SHA256   # Windows
 
 <img src="docs/screenshots/macos-tester.png" width="760" alt="키 테스터 탭 — 눌린 키가 키보드 그림에 켜짐">
 
-키보드 그림 위에서 지금 눌린 키가 켜지고, 최근 입력(usage 코드 포함)이 목록으로 쌓입니다. 노브 돌리기/누르기도 소비자(consumer) usage 로 잡힙니다. 매핑을 적용한 키는 주황색 테두리와 `→대상` 라벨로 표시됩니다.
+키보드 그림 위에서 지금 눌린 키가 켜지고, 최근 입력(usage 코드 포함)이 목록으로 쌓입니다. 노브 돌리기/누르기도 소비자(consumer) usage 로 잡힙니다. 매핑을 적용한 키는 주황색 테두리와 대상 키 라벨(넓은 키에서는 `→대상`)로 표시됩니다.
 
 오른쪽 위 **키보드 모드** 선택기(Mac 모드 / Windows 모드)는 키보드 펌웨어 모드에 맞춰 하단열 그림을 바꿉니다 ([5. 키보드 모드와 하단열](#5-키보드-모드와-하단열)). "배열표에 없는 입력" 카드는 선택한 모드와 펌웨어 모드가 다를 때 쌓입니다.
 
@@ -409,7 +409,7 @@ scripts/release.sh               버전 올리기 · 로컬 패키징 · 태그
 scripts/crash-monitor.sh         macOS 크래시 리포트 요약
 scripts/make-icon.swift          macOS 아이콘 생성
 scripts/screenshots.sh           README 스크린샷 다시 찍기 (docs/screenshots/, screenshot-post.swift 사용)
-docs/screenshots/                README 에 쓰는 macOS 앱 스크린샷 (1120×740)
+docs/screenshots/                README 에 쓰는 macOS 앱 스크린샷 (1240×880)
 .github/workflows/ci.yml         push/PR 빌드 검사 (macOS + Windows)
 .github/workflows/release.yml    태그 푸시 시 빌드 + GitHub Release
 ```

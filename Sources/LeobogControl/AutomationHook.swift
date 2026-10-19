@@ -1,6 +1,5 @@
 import SwiftUI
 import AppKit
-import Combine
 import LeobogCore
 
 /// 문서용 스크린샷 자동화 훅. `open -a "Leobog Control" --args -automation YES` 로 띄웠을 때만 켜지며,
@@ -13,9 +12,25 @@ enum AutomationHook {
     static let name = Notification.Name("com.leobog.control.automation")
     static var enabled: Bool { CommandLine.arguments.contains("-automation") }
 
-    static var publisher: AnyPublisher<Notification, Never> {
-        guard enabled else { return Empty().eraseToAnyPublisher() }
-        return DistributedNotificationCenter.default().publisher(for: name).receive(on: RunLoop.main).eraseToAnyPublisher()
+    private static var observer: Observer?
+
+    /// 앱 시작 시 한 번 호출. SwiftUI 의 onReceive 대신 selector 로 직접 등록하는 이유: 앱이 비활성(다른 앱이 앞)일 때
+    /// AppKit 이 분산 알림 센터를 suspend 하는데, `.deliverImmediately` 로 등록해야 그 상태에서도 바로 받는다.
+    @MainActor
+    static func start(model: AppModel) {
+        AppLog.shared.log("automation", "start 호출: enabled=\(enabled) args=\(CommandLine.arguments.dropFirst().joined(separator: " "))")
+        guard enabled, observer == nil else { return }
+        let o = Observer(model: model)
+        DistributedNotificationCenter.default().addObserver(o, selector: #selector(Observer.receive(_:)), name: name, object: nil, suspensionBehavior: .deliverImmediately)
+        observer = o
+        AppLog.shared.log("automation", "자동화 훅 등록 (\(name.rawValue))")
+    }
+
+    @MainActor
+    private final class Observer: NSObject {
+        let model: AppModel
+        init(model: AppModel) { self.model = model }
+        @objc func receive(_ n: Notification) { AutomationHook.handle(n, model: model) }
     }
 
     @MainActor

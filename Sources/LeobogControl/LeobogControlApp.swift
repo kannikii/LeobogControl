@@ -30,7 +30,8 @@ struct LeobogControlApp: App {
     @StateObject private var model = AppModel()
 
     var body: some Scene {
-        WindowGroup("Leobog Control") {
+        // id 를 주면 창 프레임 자동 저장 키가 바뀌어, 예전 기본 크기(1120×740)로 저장된 프레임 대신 새 defaultSize 가 적용된다
+        WindowGroup("Leobog Control", id: "main-1240") {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(model.hid)
@@ -38,9 +39,9 @@ struct LeobogControlApp: App {
                 .environmentObject(model.remap)
                 .environmentObject(model.fn)
                 .environmentObject(model.battery)
-                .frame(minWidth: 980, minHeight: 640)
+                .frame(minWidth: 1040, minHeight: 720)
         }
-        .defaultSize(width: 1120, height: 740)
+        .defaultSize(width: 1240, height: 880)
         .commands {
             CommandGroup(replacing: .newItem) {}
         }

@@ -56,19 +56,22 @@ struct KeyboardDiagramView: View {
                     else { RoundedRectangle(cornerRadius: 4 * scale).stroke(strokeColor(sel: isSel, hi: isHi, remap: remapLabel != nil), lineWidth: isSel || isHi ? 2 : 1) }
                 }
             )
+            // 매핑된 키는 원래 라벨을 조금 줄이고 대상 라벨을 아래에 둔다. 좁은 키(F열 등)에서는 화살표를 빼서
+            // 글자가 지나치게 작아지지 않게 한다 — 주황색 글씨와 테두리만으로도 매핑 표시가 된다.
+            let narrow = key.frame.width * scale < 48
             VStack(spacing: 0) {
                 Text(key.displayLabel)
-                    .font(.system(size: fontSize, weight: .medium))
+                    .font(.system(size: remapLabel == nil ? fontSize : fontSize * 0.85, weight: .medium))
                     .foregroundStyle(isPressed ? Color.white : (colors[key.id] != nil ? Color.black.opacity(0.75) : Color.primary))
-                    .lineLimit(1).minimumScaleFactor(0.5)
+                    .lineLimit(1).minimumScaleFactor(0.6).allowsTightening(true)
                 if let r = remapLabel {
-                    Text("→\(r)")
-                        .font(.system(size: fontSize * 0.85, weight: .semibold))
+                    Text(narrow ? r : "→\(r)")
+                        .font(.system(size: fontSize * 0.9, weight: .semibold))
                         .foregroundStyle(isPressed ? Color.white : Color.orange)
-                        .lineLimit(1).minimumScaleFactor(0.5)
+                        .lineLimit(1).minimumScaleFactor(0.6).allowsTightening(true)
                 }
             }
-            .padding(1)
+            .padding(.horizontal, 1)
         }
         .contentShape(Rectangle())
     }

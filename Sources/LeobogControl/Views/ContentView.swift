@@ -20,7 +20,7 @@ struct ContentView: View {
             }
             .navigationTitle(model.section.rawValue)
         }
-        .onReceive(AutomationHook.publisher) { AutomationHook.handle($0, model: model) }
+        .onAppear { AutomationHook.start(model: model) }
     }
 
     private var crashBanner: some View {

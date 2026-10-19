@@ -18,9 +18,10 @@ struct ShortcutsView: View {
                 Picker("분류", selection: $category) {
                     ForEach(FnLayerReference.categories, id: \.self) { Text($0).tag($0) }
                 }.pickerStyle(.segmented)
+                Text("키보드 모드").foregroundStyle(.secondary).fixedSize()
                 Picker("키보드 모드", selection: $model.keyboardMode) {
                     ForEach(KeyboardMode.allCases) { Text($0.label).tag($0) }
-                }.pickerStyle(.segmented).frame(width: 200).help("키보드에서 Fn + M 으로 전환하는 펌웨어 모드")
+                }.labelsHidden().pickerStyle(.segmented).frame(width: 200).help("키보드에서 Fn + M 으로 전환하는 펌웨어 모드")
             }
 
             Table(FnLayerReference.shortcuts(in: category)) {
