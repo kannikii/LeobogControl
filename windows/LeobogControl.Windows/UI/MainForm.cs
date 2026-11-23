@@ -3,7 +3,7 @@ using LeobogControl.Core;
 
 namespace LeobogControl.UI;
 
-public sealed class MainForm : Form
+public sealed partial class MainForm : Form
 {
     readonly HidDeviceManager _hid = new();
     readonly CompxClient _client;
@@ -57,8 +57,10 @@ public sealed class MainForm : Form
     readonly ToolTip _tip = new();                                                   // RefreshPicker 마다 새로 만들면 핸들이 누수된다
     readonly Font _boldFont = new(SystemFonts.DefaultFont, FontStyle.Bold);
 
-    public MainForm()
+    public MainForm(AppSettings settings, bool startHidden)
     {
+        _settings = settings;
+        _startHidden = startHidden;
         _client = new CompxClient(_hid);
         Text = "Leobog Control (Windows)";
         AutoScaleMode = AutoScaleMode.Dpi; AutoScaleDimensions = new SizeF(96F, 96F);   // 고DPI 에서 픽셀 높이 고정 Label 이 잘리지 않도록
@@ -83,6 +85,7 @@ public sealed class MainForm : Form
         _tabs.TabPages.Add(BuildFnTab());
         _tabs.TabPages.Add(BuildLedTab());
         _tabs.TabPages.Add(BuildDiagTab());
+        _tabs.TabPages.Add(BuildSettingsTab());   // RefreshRemaps 가 TabPages[2] 를 쓰므로 새 탭은 맨 뒤에
         Controls.Add(_tabs);
         Controls.Add(top);
 
@@ -93,16 +96,23 @@ public sealed class MainForm : Form
         AppLog.Line += l => UI(() => AppendAppLog(l));
         _raw.KeyEvent += OnRawKey;
 
-        Load += (_, _) =>
-        {
-            _raw.Register(Handle);
-            _hid.Refresh();
-            if (!_hid.IsOpen) _hid.OpenBest();
-            RefreshState(); RefreshRemaps(); RefreshVendorLog();
-            // 지금까지의 이벤트 줄은 이미 파일에도 있으므로, 파일 꼬리로 한 번에 바꿔 중복·순서 역전을 막는다
-            try { if (File.Exists(AppPaths.LogFile)) { var tail = File.ReadLines(AppPaths.LogFile).TakeLast(200).ToList(); _appLines.Clear(); _appLines.AddRange(tail); RenderAppLog(); } } catch { }
-        };
+        Load += (_, _) => InitOnce();
+        SetupBackground();
         FormClosed += (_, _) => { _raw.Dispose(); _hid.Dispose(); };
+    }
+
+    bool _initialized;
+    /// 장치 열기·Raw Input 등록 등 첫 표시 때 하던 준비. 창 없이(트레이로만) 시작할 때는 SetVisibleCore 에서 먼저 부른다.
+    void InitOnce()
+    {
+        if (_initialized) return;
+        _initialized = true;
+        _raw.Register(Handle);
+        _hid.Refresh();
+        if (!_hid.IsOpen) _hid.OpenBest();
+        RefreshState(); RefreshRemaps(); RefreshVendorLog();
+        // 지금까지의 이벤트 줄은 이미 파일에도 있으므로, 파일 꼬리로 한 번에 바꿔 중복·순서 역전을 막는다
+        try { if (File.Exists(AppPaths.LogFile)) { var tail = File.ReadLines(AppPaths.LogFile).TakeLast(200).ToList(); _appLines.Clear(); _appLines.AddRange(tail); RenderAppLog(); } } catch { }
     }
 
     protected override void WndProc(ref Message m)

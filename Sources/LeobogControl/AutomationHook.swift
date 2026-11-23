@@ -7,6 +7,8 @@ import LeobogCore
 ///   section : SidebarSection.rawValue (예: "키 매핑")
 ///   size    : "1120x740" (창 내용 크기)
 ///   capture : PNG 저장 경로 — 자기 창만 캡처하므로 화면 기록 권한이 필요 없다
+///   close   : 아무 값 — 메인 창을 닫는다 (창 닫기 동작 시험용)
+///   state   : 아무 값 — 메인 창 상태와 활성화 정책을 로그에 남긴다
 /// 일반 실행에서는 알림을 구독하지 않는다.
 enum AutomationHook {
     static let name = Notification.Name("com.leobog.control.automation")
@@ -37,6 +39,16 @@ enum AutomationHook {
     static func handle(_ n: Notification, model: AppModel) {
         guard enabled, let info = n.userInfo else { return }
         if let raw = info["section"] as? String, let s = SidebarSection(rawValue: raw) { model.section = s }
+        if info["state"] != nil {
+            let mains = NSApp.windows.filter(MainWindow.isMain)
+            AppLog.shared.log("automation", "상태: 정책 \(NSApp.activationPolicy().rawValue) · 메인 창 \(mains.map { "\($0.identifier?.rawValue ?? "?") visible=\($0.isVisible) key=\($0.isKeyWindow)" })")
+            return
+        }
+        if info["close"] != nil {
+            AppLog.shared.log("automation", "메인 창 닫기 (닫기 동작: \(CloseBehavior.current.rawValue))")
+            NSApp.windows.filter(MainWindow.isMain).forEach { $0.performClose(nil) }
+            return
+        }
         let window = NSApp.windows.first { $0.isVisible && $0.contentView != nil && !$0.title.isEmpty } ?? NSApp.windows.first { $0.isVisible }
         if let size = info["size"] as? String, let w = window {
             let p = size.split(separator: "x").compactMap { Double($0) }

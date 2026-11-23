@@ -9,5 +9,6 @@ public static class AppPaths
     /// 키 매핑 저장 파일 — macOS 앱의 remaps.json 과 같은 JSON 형식 ({"src":{"page":7,"usage":57},"dst":{...}})
     public static string RemapsFile => Path.Combine(SupportDir, "remaps.json");
     public static string RegApplyFile => Path.Combine(SupportDir, "scancode-map.reg");
+    public static string SettingsFile => Path.Combine(SupportDir, "settings.json");
     public static string RegRemoveFile => Path.Combine(SupportDir, "scancode-map-remove.reg");
 }

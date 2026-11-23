@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 import LeobogCore
 
 struct ContentView: View {
@@ -6,6 +7,7 @@ struct ContentView: View {
     @EnvironmentObject var hid: HIDDeviceManager
     @EnvironmentObject var battery: BatteryService
     @EnvironmentObject var ble: BLEBatteryReader
+    @State private var askLoginItem = false
 
     var body: some View {
         NavigationSplitView {
@@ -21,7 +23,35 @@ struct ContentView: View {
             }
             .navigationTitle(model.section.rawValue)
         }
-        .onAppear { AutomationHook.start(model: model) }
+        .onAppear {
+            AutomationHook.start(model: model)
+            if MainWindow.startHidden {
+                // 로그인 시작(백그라운드 모드): 창을 띄우지 않고 메뉴 막대 아이콘으로만 대기
+                MainWindow.startHidden = false
+                DispatchQueue.main.async { NSApp.windows.filter(MainWindow.isMain).forEach { $0.close() } }
+                return
+            }
+            askLoginItemIfFirstRun()
+        }
+        .alert("로그인 시 자동으로 실행할까요?", isPresented: $askLoginItem) {
+            Button("시작 프로그램으로 등록") {
+                UserDefaults.standard.set(true, forKey: LoginItem.askedKey)
+                LoginItem.set(true)
+            }
+            Button("나중에", role: .cancel) {
+                UserDefaults.standard.set(true, forKey: LoginItem.askedKey)
+            }
+        } message: {
+            Text("Mac 을 켜고 로그인할 때마다 Leobog Control 이 자동으로 실행됩니다. 창을 닫는 동작이 '백그라운드 실행'이면 창 없이 메뉴 막대 아이콘으로만 시작합니다.\n\n언제든 설정에서 바꿀 수 있습니다.")
+        }
+    }
+
+    /// 처음 설치 후 한 번만 묻는다 (스크린샷 자동화 실행·이미 등록된 경우 제외)
+    private func askLoginItemIfFirstRun() {
+        guard !AutomationHook.enabled, !UserDefaults.standard.bool(forKey: LoginItem.askedKey) else { return }
+        if LoginItem.isEnabled { UserDefaults.standard.set(true, forKey: LoginItem.askedKey); return }
+        AppLog.shared.log("login", "첫 실행: 로그인 항목 등록 여부 묻기")
+        askLoginItem = true
     }
 
     private var crashBanner: some View {
@@ -50,6 +80,7 @@ struct ContentView: View {
                 case .lighting: LightingView()
                 case .diagnostics: DiagnosticsView()
                 case .crash: CrashMonitorView()
+                case .settings: SettingsView()
                 }
             }
     }

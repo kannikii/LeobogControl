@@ -89,7 +89,8 @@ Get-FileHash .\LeobogControl-Windows-x.y.z.zip -Algorithm SHA256   # Windows
 2. "장치" 탭에 **거부됨** 으로 보이면 macOS 가 이전 결정(거부, 또는 앱을 다시 빌드해서 무효가 된 허용)을 기억하고 있어 대화상자를 다시 띄우지 않는 것입니다. 이때 버튼은 **권한 기록 지우고 다시 요청** 으로 바뀌며, 누르면 기록을 지우고(`tccutil reset ListenEvent com.leobog.control`) 바로 다시 묻습니다.
 3. 권한이 **없어도** 되는 기능: 장치 정보 · 배터리, **키 매핑**, 펑션키 설정, Fn 단축키 표, 키 테스터(앱 창이 맨 앞에 있을 때만).
 4. 배터리 **직접 읽기**만 별도로 macOS 블루투스 권한을 쓴다 (장치 탭 버튼으로 처음 한 번 요청, 입력 모니터링과 무관).
-4. 권한이 **필요한** 기능: 키 테스터의 HID 수준 감지(다른 앱이 앞에 있어도 감지), 진단 탭의 벤더 채널, 조명 탭의 "키보드에 적용".
+5. 권한이 **필요한** 기능: 키 테스터의 HID 수준 감지(다른 앱이 앞에 있어도 감지), 진단 탭의 벤더 채널, 조명 탭의 "키보드에 적용".
+6. 처음 실행 때 한 번 **"로그인 시 자동으로 실행할까요?"** 를 묻습니다. 나중에 [설정 탭](#설정--백그라운드-실행)에서 바꿀 수 있습니다.
 
 ### 2.2 탭별 기능
 
@@ -166,6 +167,14 @@ Get-FileHash .\LeobogControl-Windows-x.y.z.zip -Algorithm SHA256   # Windows
 - 실행 중 메모리 사용량(footprint)과 시스템 메모리 압박 단계를 2초마다 보여 주고, `~/Library/Logs/LeobogControl/app.log` 의 동작 기록(화면 전환, 장치 연결/해제, 권한 변화, 종료)을 함께 보여 줍니다. 비정상 종료 뒤 다시 실행하면 "지난 실행이 비정상 종료됨" 배너가 뜹니다.
 - 터미널에서는 `zsh scripts/crash-monitor.sh` 로 같은 내용을 요약할 수 있습니다.
 
+#### 설정 · 백그라운드 실행
+
+- **창을 닫을 때**: **백그라운드에서 계속 실행**(기본값) 또는 **그냥 끄기**.
+  - 백그라운드 실행: 창을 닫으면 Dock 아이콘이 사라지고 **메뉴 막대에 작은 로고 아이콘**(키 격자 모양, 메뉴 막대 색을 따르는 단색)이 남습니다. 아이콘을 누르면 **Leobog Control 열기 / 연결 상태 / 배터리 / 키 매핑… / 설정… / 종료(⌘Q)** 메뉴가 나옵니다. 창을 다시 열면 Dock 아이콘도 돌아옵니다. Dock 아이콘을 누르거나 Spotlight 로 다시 실행해도 창이 열립니다.
+  - 그냥 끄기: 메뉴 막대 아이콘이 없고, 마지막 창을 닫으면 앱이 종료됩니다.
+- **로그인 시 Leobog Control 열기**: 시스템 설정 → 일반 → 로그인 항목의 '로그인 시 열기' 목록에 등록합니다(`SMAppService`). 처음 실행 때 한 번 **"로그인 시 자동으로 실행할까요?"** 를 묻고, 이후에는 여기서 켜고 끕니다. 백그라운드 실행 모드에서는 로그인 때 창 없이 메뉴 막대 아이콘으로만 시작합니다. 상태가 '승인 필요' 로 보이면 **로그인 항목 설정 열기…** 로 가서 스위치를 켭니다.
+- 터미널에서 `open -a "Leobog Control" --args --background` 로 실행해도 창 없이 메뉴 막대 아이콘으로 시작합니다.
+
 ---
 
 ## 3. macOS CLI
@@ -197,7 +206,7 @@ alias leobog='"/Applications/Leobog Control.app/Contents/MacOS/leobog-cli"'
 
 `LeobogControl.exe` 하나로 동작합니다 (.NET 7 WinForms, 런타임 동봉). 동글 또는 USB 로 연결한 키보드를 VID `0x3554` 로 찾습니다.
 
-> 이 README 의 스크린샷은 모두 macOS 앱입니다. Windows 앱은 같은 탭 구성(장치 · 키 테스터 · 키 매핑 · 단축키 · 조명 · 진단)을 WinForms 로 옮긴 것으로, 화면 구성은 비슷하지만 생김새는 다릅니다.
+> 이 README 의 스크린샷은 모두 macOS 앱입니다. Windows 앱은 같은 탭 구성(장치 · 키 테스터 · 키 매핑 · 단축키 · 조명 · 진단 · 설정)을 WinForms 로 옮긴 것으로, 화면 구성은 비슷하지만 생김새는 다릅니다.
 
 ### 4.1 macOS 버전과 다른 점
 
@@ -208,7 +217,8 @@ alias leobog='"/Applications/Leobog Control.app/Contents/MacOS/leobog-cli"'
 | 표현 불가 매핑 | 화면 밝기(`f-bright`), macOS Fn/🌐 (`rcmd-fn`, `rctrl-fn`)는 Scancode Map 으로 표현할 수 없어 프리셋 메뉴에서 "(macOS 전용)" 으로 비활성화되고, 목록에서는 **표현 불가** 로 표시되어 적용 시 제외됩니다. |
 | 키 테스터 | Raw Input(`WM_INPUT`) 으로 받으므로 별도 권한이 없고, 장치 이름(`VID_3554`)으로 이 키보드의 입력만 구분합니다. 다만 Scancode Map 이 **적용된 뒤의** 스캔코드가 보입니다(키보드 클래스 드라이버에서 이미 치환됨). |
 | 공식 드라이버와 충돌 | LEOBOG ONE 드라이버가 실행 중이면 벤더 채널을 먼저 점유해 이 앱의 조명·진단 탭이 응답을 못 받을 수 있습니다. 둘 중 하나만 띄우세요. |
-| 저장 위치 | 매핑 `%APPDATA%\LeobogControl\remaps.json` (macOS 와 같은 형식), 적용용 `.reg` 파일 같은 폴더, 로그 `%LOCALAPPDATA%\LeobogControl\Logs\app.log` |
+| 백그라운드 실행 | macOS 는 메뉴 막대 아이콘, Windows 는 작업 표시줄 알림 영역(트레이) 아이콘. 자동 실행은 macOS 로그인 항목 / Windows 현재 사용자 Run 키. |
+| 저장 위치 | 매핑 `%APPDATA%\LeobogControl\remaps.json` (macOS 와 같은 형식), 설정 `settings.json` · 적용용 `.reg` 파일 같은 폴더, 로그 `%LOCALAPPDATA%\LeobogControl\Logs\app.log` |
 
 ### 4.2 탭별 기능
 
@@ -238,6 +248,13 @@ macOS 와 같은 흐름입니다. 키 클릭 → 오른쪽에서 대상 선택 �
 
 #### 진단
 벤더 채널 패킷 로그(송신/수신/체크섬 판별), **프로브 / 키맵 읽기(`0x41`, 읽기 전용) / 벤더 로그 지우기 / 로그 폴더 열기**, 그리고 앱 동작 로그(`app.log` 의 마지막 200줄부터 실시간).
+
+#### 설정 · 백그라운드 실행
+- **창을 닫을 때**: **백그라운드에서 계속 실행**(기본값) 또는 **그냥 끄기**.
+  - 백그라운드 실행: X 버튼·Alt+F4 로 창을 닫으면 작업 표시줄 **오른쪽 아래 알림 영역(트레이)** 에 로고 아이콘이 남습니다. 아이콘을 누르면 창이 다시 열리고, **오른쪽 클릭** 메뉴에서 **Leobog Control 열기 / 연결 상태 / 설정… / 종료** 를 고릅니다. 처음 숨길 때 한 번 풍선 알림으로 알려 줍니다. 아이콘이 `^`(숨겨진 아이콘) 안에 들어가 있으면 작업 표시줄 설정에서 항상 보이게 할 수 있습니다.
+  - 그냥 끄기: 트레이 아이콘이 없고 창을 닫으면 앱이 종료됩니다.
+- **Windows 시작 시 자동 실행**: 현재 사용자 Run 키(`HKCU\Software\Microsoft\Windows\CurrentVersion\Run`, 값 `LeobogControl`)에 `"…\LeobogControl.exe" --background` 로 등록합니다. 관리자 권한이 필요 없고 작업 관리자 → 시작 앱 목록에 보입니다. 처음 실행 때 한 번 **"Windows 를 켤 때마다 자동으로 실행할까요?"** 를 묻고, 이후에는 여기서 켜고 끕니다. 백그라운드 실행 모드에서는 로그인 때 창 없이 트레이 아이콘으로만 시작합니다. exe 를 다른 폴더로 옮겼으면 체크를 다시 켜서 현재 위치로 고칩니다.
+- 앱은 한 번만 실행됩니다. 이미 떠 있을 때(트레이에 숨어 있어도) exe 를 다시 실행하면 기존 창이 앞으로 옵니다.
 
 ---
 
@@ -343,7 +360,10 @@ zsh scripts/release.sh clean             # build/ dist/ 정리
 
 ### macOS
 
+먼저 앱의 설정 탭에서 **로그인 시 Leobog Control 열기** 를 끕니다 (앱을 지우면 macOS 가 로그인 항목도 정리하지만, 끄고 지우는 편이 확실합니다).
+
 ```bash
+osascript -e 'quit app "Leobog Control"'   # 메뉴 막대에 떠 있으면 먼저 종료
 launchctl bootout gui/$(id -u)/com.leobog.control.remap 2>/dev/null; rm -f ~/Library/LaunchAgents/com.leobog.control.remap.plist
 hidutil property --matching '{"VendorID":0x3554,"ProductID":0xFA07}' --set '{"UserKeyMapping":[]}'
 rm -rf "/Applications/Leobog Control.app" ~/Library/Application\ Support/LeobogControl ~/Library/Logs/LeobogControl
@@ -357,7 +377,13 @@ rm -rf "/Applications/Leobog Control.app" ~/Library/Application\ Support/LeobogC
 Remove-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layout' -Name 'Scancode Map'
 ```
 
-2. `LeobogControl.exe` 와 `%APPDATA%\LeobogControl`, `%LOCALAPPDATA%\LeobogControl` 폴더를 지웁니다.
+2. 설정 탭에서 **Windows 시작 시 자동 실행** 을 끄고, 트레이 아이콘 오른쪽 클릭 → **종료** 로 앱을 끕니다. 앱을 이미 지웠다면 PowerShell 에서:
+
+```powershell
+Remove-ItemProperty -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run' -Name 'LeobogControl'
+```
+
+3. `LeobogControl.exe` 와 `%APPDATA%\LeobogControl`, `%LOCALAPPDATA%\LeobogControl` 폴더를 지웁니다.
 
 ---
 
@@ -402,10 +428,13 @@ Sources/LeobogCore/              macOS 공용 모듈
   Diagnostics/                   동작 기록(app.log), 메모리 통계, .ips 크래시 리포트 파서
 Sources/LeobogControl/           SwiftUI 앱 (탭별 View)
   AutomationHook.swift           README 스크린샷용 자기 창 캡처 훅 (`-automation` 인자로 실행했을 때만 동작)
+  BackgroundMode.swift           창 닫기 동작, 메뉴 막대 아이콘·메뉴, 로그인 항목(SMAppService)
+  Views/SettingsView.swift       설정 탭
 Sources/leobog-cli/              커맨드라인 도구 (LaunchAgent 의 watch 포함)
 windows/LeobogControl.Windows/   Windows 앱 (.NET 7 WinForms)
   Core/                          HidSharp 장치 관리, Compx 프로토콜, Scancode Map, Raw Input, 레이아웃·참고표
-  UI/                            MainForm (6개 탭), KeyboardDiagram
+  Core/AppSettings.cs            settings.json (창 닫기 동작 등), StartupRegistration.cs — HKCU Run 키 자동 실행
+  UI/                            MainForm (7개 탭), MainForm.Background.cs — 트레이 아이콘·설정 탭, KeyboardDiagram
   Resources/app.ico              아이콘
 scripts/build-app.sh             macOS 빌드·번들·서명·설치
 scripts/release.sh               버전 올리기 · 로컬 패키징 · 태그

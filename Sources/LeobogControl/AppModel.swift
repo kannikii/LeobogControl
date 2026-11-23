@@ -12,6 +12,7 @@ enum SidebarSection: String, CaseIterable, Identifiable {
     case lighting = "조명 (RGB)"
     case diagnostics = "진단 · 벤더 채널"
     case crash = "크래시 · 메모리 모니터"
+    case settings = "설정"
 
     var id: String { rawValue }
     var icon: String {
@@ -24,6 +25,7 @@ enum SidebarSection: String, CaseIterable, Identifiable {
         case .lighting: return "lightbulb.led"
         case .diagnostics: return "stethoscope"
         case .crash: return "exclamationmark.triangle"
+        case .settings: return "gearshape"
         }
     }
 }
